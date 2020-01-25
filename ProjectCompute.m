@@ -18,8 +18,8 @@ k6r = 1;    % [s^-1] react6 reverse rate constant
 k7f = 1;    % [uM^-1 s^-1] react7 forward rate constant
 k7r = 1;    % [s^-1] react7 reverse rate constant
 k8f = 1;    % [uM^-1 s^-1] react8 forward rate constant
-k8r = 1;    % [s^-1] react8 reverse rate constant
-k9f = 1;    % [uM^-1 s^-1] react9 forward rate constant
+k8r = .5;    % [s^-1] react8 reverse rate constant
+k9f = .5;    % [uM^-1 s^-1] react9 forward rate constant
 HS = 1;     % initial concentrations of ligand
 FGF2 = 1;   % initial concentrations of ligand
 FRS2 = 1;   % initial concentration of limiting receptor
@@ -52,35 +52,35 @@ xlabel('Time (sec)'); ylabel('y(t) (\muM)'); legend('HS','FGF2','FGF2HS','FGFRac
 % legend('react1f','react1r','react2f','react2r','react3f','react3r','react4f','react5f','react5r','react6f','react6r','react7f','react7r','react8f','react8r','react9f');
 
 %% Run dose response over a range of total ligand concentrations
-%% HS
+% %% HS
+% paramRange = 10.^[-2:.1:2];
+% for i=1:length(paramRange)
+%     HS = paramRange(i);
+%     params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8f,k8r,k9f,HS,FGF2,FRS2};
+%     y0 = [HS; FGF2; 0; 0; FRS2; 0; 0; 0; 0 ; 0]; % could also load in saved data from a file like y0 = load('yfinal.dat');
+%     tspan = [0 10];
+%     options = [];
+%     [t,y] = ode15s(@ProjectODEfunc,tspan,y0,options,params);
+%     Pfinal(i) = y(end,end);
+% end
+% subplot(1,3,3);
+% semilogx(paramRange,Pfinal);
+% xlabel('HS (\muM)'); ylabel('Steady state Product (\muM)');
+
+%% FGF2
 paramRange = 10.^[-2:.1:2];
 for i=1:length(paramRange)
     HS = paramRange(i);
-    params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8f,k8r,k9f,HS,FGF2,FRS2};
+    params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8f,k8r,k9f};
     y0 = [HS; FGF2; 0; 0; FRS2; 0; 0; 0; 0 ; 0]; % could also load in saved data from a file like y0 = load('yfinal.dat');
     tspan = [0 10];
-    options = [];
-    [t,y] = ode15s(@ProjectODEfunc,tspan,y0,options,params);
+    options = [HS; 0; ];
+    [t,y]= ode15s(@ProjectODEfunc,tspan,y0,options,params);
     Pfinal(i) = y(end,end);
 end
 subplot(1,3,3);
 semilogx(paramRange,Pfinal);
-xlabel('HS (\muM)'); ylabel('Steady state Product (\muM)');
-
-% %% FGF2
-% paramRange = 10.^[-2:.1:2];
-% for i=1:length(paramRange)
-%     HS = paramRange(i);
-%     params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8f,k8r,k9f};
-%     y0 = [HS; FGF2; 0; 0; FRS2; 0; 0; 0; 0 ; 0]; % could also load in saved data from a file like y0 = load('yfinal.dat');
-%     tspan = [0 10];
-%     options = [HS; 0; ];
-%     [t,y] ode15s(@ProjectODEfunc,tspan,y0,options,params);
-%     pFinal(i) = y(end,end);
-% end
-% subplot(1,3,3);
-% semilogx(paramRange,Pfinal);
-% xlabel('FGF2 (\muM)'); ylabel('Steady state Product (\muM)');
+xlabel('FGF2 (\muM)'); ylabel('Steady state Product (\muM)');
 
 %% FRS2
 % paramRange = 10.^[-2:.1:2];
@@ -90,8 +90,8 @@ xlabel('HS (\muM)'); ylabel('Steady state Product (\muM)');
 %     y0 = [HS; FGF2; 0; 0; FRS2; 0; 0; 0; 0 ; 0]; % could also load in saved data from a file like y0 = load('yfinal.dat');
 %     tspan = [0 10];
 %     options = [HS; 0; ];
-%     [t,y] ode15s(@ProjectODEfunc,tspan,y0,options,params);
-%     pFinal(i) = y(end,end);
+%     [t,y]= ode15s(@ProjectODEfunc,tspan,y0,options,params);
+%     Pfinal(i) = y(end,end);
 % end
 % subplot(1,3,3);
 % semilogx(paramRange,Pfinal);
