@@ -2,29 +2,29 @@ function [dydt, algvars] = ProjectODEfunc(t,y,params)
 % 1/25/20 GH: initial 
 
 % Assign names for parameter values and state variables
-[k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8,k9f,HS,FGF2,FRS2,Vratio] = params{:};
+[k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8,k9f, Vratio] = params{:};
 
 HS = y(1);
-%FGF2 =y(2);
-FGF2HS = y(2);
-FGFRact = y(3);
-FRS2 = y(4);
-RAS = y(5);
-RAF = y(6);
-MEK = y(7);
-ERK = y(8);
-pERKNu = y(9);
+FGF2 =y(2);
+FGF2HS = y(3);
+FGFRact = y(4);
+FRS2 = y(5);
+RAS = y(6);
+RAF = y(7);
+MEK = y(8);
+ERK = y(9);
+pERKNu = y(10);
 
 % Rates
 react1 = k1f*FGF2*HS - k1r*FGF2HS;
 react2 = k2f*FGF2*HS - k2r*FGFRact;
 react3 = k3f*FGF2HS - k3r*FGFRact;
 react4 = k4f*FGFRact*FRS2;
-react5 = k5f*RAS;% - k5r*RAF;
-react6 = k6f*RAF;% - k6r*MEK;
-react7 = k7f*MEK;% - k7r*ERK;
+react5 = k5f*RAS - k5r*RAF;
+react6 = k6f*RAF - k6r*MEK;
+react7 = k7f*MEK - k7r*ERK;
 react8 = k8*(ERK-pERKNu);
-react9 = ERK/(1 + ERK); %k9f*ERK;
+react9 = k9f*ERK;
 % react1f = k1f*FGF2*HS;
 % react1r = k1r*FGF2HS;
 % react2f = k2f*FGF2*HS;
@@ -43,17 +43,15 @@ react9 = ERK/(1 + ERK); %k9f*ERK;
 
 % Differential Equations
 dHS = -react1 - react2;
-% dFGF2 = -react1 - react2;
+dFGF2 = -react1 - react2;
 dFGF2HS = react1 + react3;
-dFGFRact = react2 - react3 - react4;
-dFRS2 = react9;
+dFGFRact = react2 - react3;
+dFRS2 = -react9;
 dRAS = react4 - react5;
 dRAF = react5 - react6;
 dMEK = react6 - react7;
-dERK = react7 - react8 - react9;
-dpERKNu = react8/Vratio;
-
-% Something wrong with mass conservation of FRS2
+dERK = react7 - react8;
+dpERKNu = react
 
 % dHS = react1r + react2r - react1f - react2r;
 % dFGF2 = react1r + react2r - react1f - react2r;
@@ -62,9 +60,8 @@ dpERKNu = react8/Vratio;
 % dFRS2 = 0;%-react9f;
 % dRAS = react4f + react5r - react5f;
 % dRAF = react5f + react6r - react5r - react6f;
-% dMEK = react6f + react7r - react6r - react7f; 
-% dERK = react7f - react7r - react8 - react9f;
-% dpERKNu = (react8)/Vratio;
-dydt = [dHS;dFGF2HS;dFGFRact;dFRS2;dRAS;dRAF;dMEK;dERK;dpERKNu]; % reassemble differential equations
-algvars = [];
-% algvars = [react1f,react1r,react2f,react2r,react3f,react3r,react4f,react5f,react5r,react6f,react6r,react7f,react7r,react8,react9f]; % optional for seeing fluxes
+dMEK = react6f + react7r - react6r - react7f; 
+dERK = react7f - react7r - react8 - react9f;
+dpERKNu = (react8)/Vratio;
+dydt = [dHS;dFGF2;dFGF2HS;dFGFRact;dFRS2;dRAS;dRAF;dMEK;dERK;dpERKNu]; % reassemble differential equations
+algvars = [react1f,react1r,react2f,react2r,react3f,react3r,react4f,react5f,react5r,react6f,react6r,react7f,react7r,react8,react9f]; % optional for seeing fluxes
