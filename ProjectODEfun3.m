@@ -5,8 +5,8 @@ function [dydt, algvars] = ProjectODEfun3(t,y,params)
 [k1f,k1r,k2f,k2r,k3f,k3r,k4f,k4r,k6f,k6r, k7f,k7r,k8f,k8r,k9f,k9r,k10f,k10r,k11f,k11r,k12f,HS,FGF2,FGFRin,FRS2i,RASin, RAF, MEK, ERK,Vratio] = params{:};
 
 HS = y(1);
-%FGF2 =y(2);
-FGF2 = -3*t;
+FGF2 =y(2);
+%FGF2 = -3*t;
 FGF2_HS = y(3);
 FGFRin = y(4);
 FGF2_FGFR = y(5);
@@ -49,8 +49,8 @@ J12f = k12f*pERK*FRS2act;
 
 % Differential Equations
 
-%dFGF2 = J1r + J2r - J1f - J2f;
-dFGF2=-3;
+dFGF2 = J1r + J2r - J1f - J2f;
+%dFGF2=-3;
 %dFGF2=0;
 dHS = J1r + J4r - J1f - J4f;
 dFGF2_HS = J1f  - J1r +J3r - J3f;
