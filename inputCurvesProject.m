@@ -87,33 +87,8 @@ for i = 1:length(yfinal)
    title(names{i})
 end
 
-%% FGF2
-% % Sustained release input curve
-% x = 24*[0.07, 0.34, 1.13, 2.12, 3.06, 4.05, 5.03];
-% y = [0, 8.99, 14.66, 15.64, 17.60, 21.51, 23.86];
-% p = polyfit(x, y, 1);
-% x1 = 0:1:120;
-% fgf2 = polyval(p, x1); 
-% plot(x, y, 'o', x1, fgf2, 'r');
-
-% f = @(x,xdata) x(1)*(xdata.^x(2));
-% x = [3.06, 6.13, 24.07, 95.96];
-% y = [1.13, 1.66, 2.63, 3.07];
-% x0 = [100; -1];
-% [coeff] = lsqcurvefit(f, x0, x, y);
-% x1 = [0:1:120];
-% fgf2 = f(coeff, x1);
-% plot(x, y, 'o', x1, fgf2);
-
-% Burst release
-x = 24*[1, 2.63, 4.21, 5.79];%, 7.43, 9.01, 10.62, 12.20, 13.83, 15.41, 17.05];
-y = [40.44, 15.02, 12.07, 6.46];%, 4.77, 2.94, 0.56, 0.56, 0.56, 0.28, 0.14];
-f = @(x,xdata) x(1)*log(xdata) + x(2);
-x0 = [100; 1];
-[coeff] = lsqcurvefit(f, x0, x, y);
-x1 = [0:1:120];
-fgf2 = f(coeff, x1);
-plot(x, y, 'o', x1, fgf2);
+%% FGF2 - delayed release
+fgf2 = delayedRelease();
 
 % y0 = [HS FGF2 FGF2:Hs FGFR FGF2_FGFR FRS2i FGRRact FRS2act RASin actRAS inactivated RAF
 % activated RAF inactivated MEK activated MEK inactivated ERK pERK pERK nucleus
@@ -138,3 +113,129 @@ end
 figure()
 plot(0:1:120, nuclear_ERK);
 xlabel('Time (in hours)'); ylabel('Nuclear ERK');
+title('Delayed Release of FGF2');
+
+%% FGF2 - sustained release
+fgf2 = sustainedRelease();
+
+% y0 = [HS FGF2 FGF2:Hs FGFR FGF2_FGFR FRS2i FGRRact FRS2act RASin actRAS inactivated RAF
+% activated RAF inactivated MEK activated MEK inactivated ERK pERK pERK nucleus
+y0 = [HS; FGF2; 0; FGFRin; 0; FRS2i; 0; 0; RASin; 0; RAF; 0; MEK; 0; ERK; 0; 0];
+for i=1:length(fgf2)
+    y0(2) = fgf2(i);
+    params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k4r,k6f,k6r, k7f,k7r,k8f,k8r,k9f,k9r,k10f,k10r,k11f,k11r,k12f,HS,FGF2,FGFRin,FRS2i,RASin, RAF, MEK, ERK, Vratio};
+    tspan = [0 120];
+    options = [];
+    [t,y]= ode15s(@ProjectODEfun3,tspan,y0,options,params);
+    nuclear_ERK(i) = y(end,end);
+    y0 = y(end, :);
+    
+    % If any of the concentrations are less than 0, then 0
+    for j=1:length(y0)
+        if y0(j) < 0
+            y0(j) = 0;
+        end
+    end
+end
+
+figure()
+plot(0:1:120, nuclear_ERK);
+xlabel('Time (in hours)'); ylabel('Nuclear ERK');
+title('Sustained Release of FGF2');
+
+%% FGF2 - burst release
+fgf2 = burstRelease();
+
+% y0 = [HS FGF2 FGF2:Hs FGFR FGF2_FGFR FRS2i FGRRact FRS2act RASin actRAS inactivated RAF
+% activated RAF inactivated MEK activated MEK inactivated ERK pERK pERK nucleus
+y0 = [HS; FGF2; 0; FGFRin; 0; FRS2i; 0; 0; RASin; 0; RAF; 0; MEK; 0; ERK; 0; 0];
+for i=1:length(fgf2)
+    y0(2) = fgf2(i);
+    params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k4r,k6f,k6r, k7f,k7r,k8f,k8r,k9f,k9r,k10f,k10r,k11f,k11r,k12f,HS,FGF2,FGFRin,FRS2i,RASin, RAF, MEK, ERK, Vratio};
+    tspan = [0 120];
+    options = [];
+    [t,y]= ode15s(@ProjectODEfun3,tspan,y0,options,params);
+    nuclear_ERK(i) = y(end,end);
+    y0 = y(end, :);
+    
+    % If any of the concentrations are less than 0, then 0
+    for j=1:length(y0)
+        if y0(j) < 0
+            y0(j) = 0;
+        end
+    end
+end
+
+figure()
+plot(0:1:120, nuclear_ERK);
+xlabel('Time (in hours)'); ylabel('Nuclear ERK');
+title('Burst Release of FGF2');
+
+%% FGF2 - pulse release
+fgf2 = pulseRelease();
+
+% y0 = [HS FGF2 FGF2:Hs FGFR FGF2_FGFR FRS2i FGRRact FRS2act RASin actRAS inactivated RAF
+% activated RAF inactivated MEK activated MEK inactivated ERK pERK pERK nucleus
+y0 = [HS; FGF2; 0; FGFRin; 0; FRS2i; 0; 0; RASin; 0; RAF; 0; MEK; 0; ERK; 0; 0];
+for i=1:length(fgf2)
+    y0(2) = fgf2(i);
+    params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k4r,k6f,k6r, k7f,k7r,k8f,k8r,k9f,k9r,k10f,k10r,k11f,k11r,k12f,HS,FGF2,FGFRin,FRS2i,RASin, RAF, MEK, ERK, Vratio};
+    tspan = [0 120];
+    options = [];
+    [t,y]= ode15s(@ProjectODEfun3,tspan,y0,options,params);
+    nuclear_ERK(i) = y(end,end);
+    y0 = y(end, :);
+    
+    % If any of the concentrations are less than 0, then 0
+    for j=1:length(y0)
+        if y0(j) < 0
+            y0(j) = 0;
+        end
+    end
+end
+
+figure()
+plot(0:1:120, nuclear_ERK);
+xlabel('Time (in hours)'); ylabel('Nuclear ERK');
+title('Pulse Release of FGF2');
+
+%% Input curves
+function [ delayed ] = delayedRelease()
+    % PMID 21402405 Figure 2
+    % Delayed release
+    x_delayed = 24*[0.07, 0.34, 1.13, 2.12, 3.06, 4.05, 5.03];
+    y_delayed = [0, 8.99, 14.66, 15.64, 17.60, 21.51, 23.86];
+    p_delayed = polyfit(x_delayed, y_delayed, 1);
+    x1_delayed = 0:1:120;
+    delayed = polyval(p_delayed, x1_delayed); 
+end
+
+function [ sustained ] = sustainedRelease()
+    % PMID 20674970 Figure 2B, left panel
+    % Sustained release
+    f_sustained = @(x,xdata) x(1)*(xdata.^x(2));
+    x_sustained = [3.06, 6.13, 24.07, 95.96];
+    y_sustained = [1.13, 1.66, 2.63, 3.07];
+    x0 = [100; -1];
+    [coeff_sustained] = lsqcurvefit(f_sustained, x0, x_sustained, y_sustained);
+    x1_sustained = [0:1:120];
+    sustained = f_sustained(coeff_sustained, x1_sustained);
+end
+
+function [ burst ] = burstRelease()
+    % PMID 15020152 Figure 6a (open triangles)
+    % Burst release
+    x_burst = 24*[1, 2.63, 4.21, 5.79];%, 7.43, 9.01, 10.62, 12.20, 13.83, 15.41, 17.05];
+    y_burst = [40.44, 15.02, 12.07, 6.46];%, 4.77, 2.94, 0.56, 0.56, 0.56, 0.28, 0.14];
+    f_burst = @(x,xdata) x(1)*log(xdata) + x(2);
+    x0_burst = [1; 1];
+    [coeff_burst] = lsqcurvefit(f_burst, x0_burst, x_burst, y_burst);
+    x1_burst = [0:1:120];
+    burst = f_burst(coeff_burst, x1_burst);
+end
+
+function [ pulse ] = pulseRelease()
+    % Pulse like release, based on burst release 
+    y1_burst = burstRelease();
+    pulse = [y1_burst(1:(length(y1_burst)/2)+1)  y1_burst(1:(length(y1_burst)/2))];
+end

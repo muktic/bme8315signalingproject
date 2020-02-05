@@ -5,8 +5,6 @@ close all
 clear
 clc
 
-% Modeling the following reactions:
-
 %% define parameters
 k1f = 1;    % [uM^-1 h^-1] react1 forward rate constant
 k1r = 1;    % [h^-1] react1 reverse rate constant
@@ -89,77 +87,54 @@ for i = 1:length(yfinal)
    title(names{i})
 end
 
-
-
-% % optional: re-evaluate ODE function after solving ODEs to calculate
-% algebra variables
-%  for tstep=1:length(t),
-%   [~,algvars(tstep,:)]=ProjectODEfunc(t(step),y(tstep,:),params);
-%  end
-%  subplot(1,3,2);
-%  plot(t,algvars(:,1),t,algvars(:,2),t,algvars(:,3),t,algvars(:,4));
-%  xlabel('Time (sec)'); ylabel('fluxes(t) (\muM/s)');
-% legend('react1f','react1r','react2f','react2r','react3f','react3r','react4f','react5f','react5r','react6f','react6r','react7f','react7r','react8f','react8r','react9f');
-
-%% Run dose response over a range of total ligand concentrations
-% %% HS
-% paramRange = 10.^[-2:.1:2];
-% for i=1:length(paramRange)
-%     HS = paramRange(i);
-%     params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8f,k8r,k9f,HS,FGF2,FRS2};
-%     y0 = [HS; FGF2; 0; 0; FRS2; 0; 0; 0; 0 ; 0]; % could also load in saved data from a file like y0 = load('yfinal.dat');
-%     tspan = [0 10];
-%     options = [];
-%     [t,y] = ode15s(@ProjectODEfunc,tspan,y0,options,params);
-%     Pfinal(i) = y(end,end);
-% end
-% subplot(1,3,3);
-% semilogx(paramRange,Pfinal);
-% xlabel('HS (\muM)'); ylabel('Steady state Product (\muM)');
-
 %% FGF2
-paramRange = 10.^[-2:.1:4];
-for i=1:length(paramRange)
-    FGF2 = paramRange(i);
-    params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k4r,k6f,k6r, k7f,k7r,k8f,k8r,k9f,k9r,k10f,k10r,k11f,k11r,k12f,HS,FGF2,FGFRin,FRS2i,RASin, RAF, MEK, ERK, Vratio};
-   y0 = [HS; % HS
-    FGF2; % FGF2
-    0; % FGF2:Hs
-    FGFRin; % FGFR
-    0; %FGF2_FGFR
-    FRS2i; %FRS2i
-    0; %FGRRact
-    0; % FRS2act
-    RASin; % RASin
-    0; %actRAS
-    RAF; %inactivated RAF
-    0; %activated RAF
-    MEK; %inactivated MEK
-    0; %activated MEK
-    ERK; %inactivated ERK
-    0; %pERK
-    0 %pERK nucleus
-    ];
-    tspan = [0 130];
-    options = [];
-    [t,y]= ode15s(@ProjectODEfunc2,tspan,y0,options,params);
-    Pfinal(i) = y(end,end);
-end
-figure()
-semilogx(paramRange,Pfinal);
-xlabel('FGF2 (\muM)'); ylabel('Steady state Product (\muM)');
+% % Sustained release input curve
+% x = 24*[0.07, 0.34, 1.13, 2.12, 3.06, 4.05, 5.03];
+% y = [0, 8.99, 14.66, 15.64, 17.60, 21.51, 23.86];
+% p = polyfit(x, y, 1);
+% x1 = 0:1:120;
+% fgf2 = polyval(p, x1); 
+% plot(x, y, 'o', x1, fgf2, 'r');
 
-%% FRS2
-% paramRange = 10.^[-2:.1:2];
-% for i=1:length(paramRange)
-%     HS = paramRange(i);
-%     params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k5f,k5r,k6f,k6r,k7f,k7r,k8f,k8r,k9f};
-%     y0 = [HS; FGF2; 0; 0; FRS2; 0; 0; 0; 0 ; 0]; % could also load in saved data from a file like y0 = load('yfinal.dat');
-%     tspan = [0 10];
-%     options = [HS; 0; ];
-%     [t,y]= ode15s(@ProjectODEfunc,tspan,y0,options,params);
-%     Pfinal(i) = y(end,end);
-% end
-% subplot(1,3,3);
-% semilogx(paramRange,Pfinal);
-% xlabel('FRS2 (\muM)'); ylabel('Steady state Product (\muM)');
+% f = @(x,xdata) x(1)*(xdata.^x(2));
+% x = [3.06, 6.13, 24.07, 95.96];
+% y = [1.13, 1.66, 2.63, 3.07];
+% x0 = [100; -1];
+% [coeff] = lsqcurvefit(f, x0, x, y);
+% x1 = [0:1:120];
+% fgf2 = f(coeff, x1);
+% plot(x, y, 'o', x1, fgf2);
+
+% Burst release
+x = 24*[1, 2.63, 4.21, 5.79];%, 7.43, 9.01, 10.62, 12.20, 13.83, 15.41, 17.05];
+y = [40.44, 15.02, 12.07, 6.46];%, 4.77, 2.94, 0.56, 0.56, 0.56, 0.28, 0.14];
+f = @(x,xdata) x(1)*log(xdata) + x(2);
+x0 = [100; 1];
+[coeff] = lsqcurvefit(f, x0, x, y);
+x1 = [0:1:120];
+fgf2 = f(coeff, x1);
+plot(x, y, 'o', x1, fgf2);
+
+% y0 = [HS FGF2 FGF2:Hs FGFR FGF2_FGFR FRS2i FGRRact FRS2act RASin actRAS inactivated RAF
+% activated RAF inactivated MEK activated MEK inactivated ERK pERK pERK nucleus
+y0 = [HS; FGF2; 0; FGFRin; 0; FRS2i; 0; 0; RASin; 0; RAF; 0; MEK; 0; ERK; 0; 0];
+for i=1:length(fgf2)
+    y0(2) = fgf2(i);
+    params = {k1f,k1r,k2f,k2r,k3f,k3r,k4f,k4r,k6f,k6r, k7f,k7r,k8f,k8r,k9f,k9r,k10f,k10r,k11f,k11r,k12f,HS,FGF2,FGFRin,FRS2i,RASin, RAF, MEK, ERK, Vratio};
+    tspan = [0 120];
+    options = [];
+    [t,y]= ode15s(@ProjectODEfun3,tspan,y0,options,params);
+    nuclear_ERK(i) = y(end,end);
+    y0 = y(end, :);
+    
+    % If any of the concentrations are less than 0, then 0
+    for j=1:length(y0)
+        if y0(j) < 0
+            y0(j) = 0;
+        end
+    end
+end
+
+figure()
+plot(0:1:120, nuclear_ERK);
+xlabel('Time (in hours)'); ylabel('Nuclear ERK');
