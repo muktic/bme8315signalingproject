@@ -5,8 +5,7 @@ function [dydt, algvars] = ProjectODEfun3(t,y,params)
 [k1f,k1r,k2f,k2r,k3f,k3r,k4f,k4r,k6f,k6r, k7f,k7r,k8f,k8r,k9f,k9r,k10f,k10r,k11f,k11r,k12f,HS,FGF2,FGFRin,FRS2i,RASin, RAF, MEK, ERK,Vratio] = params{:};
 
 HS = y(1);
-%FGF2 =y(2); %normal burst (Saline vehicle)
-FGF2 = 0.1623*t; %delayed release function y=5.8166+0.163t, set initial condition to 5.1866
+FGF2 =y(2); %normal burst (Saline vehicle)
 FGF2_HS = y(3);
 FGFRin = y(4);
 FGF2_FGFR = y(5);
@@ -49,8 +48,10 @@ J12f = k12f*pERK*FRS2act;
 
 % Differential Equations
 
-%dFGF2 = J1r + J2r - J1f - J2f;
-dFGF2=0.1623; %delayed release. Used derivative of the function
+% dFGF2 = J1r + J2r - J1f - J2f; %for saline burst release 
+dFGF2=0.1623; %delayed release function y=5.8166+0.163t, set initial condition to 5.1866
+%dFGF2= 0.6136/(t+1); %sustained release y=0.6136*log(t+1) set initial condition % to 0
+%dFGF2= -19/(t+1); %sustained release y=19*log(t+1) set initial condition to 100
 dHS = J1r + J4r - J1f - J4f;
 dFGF2_HS = J1f  - J1r +J3r - J3f;
 dFGFRin = J2r + J3r - J2f - J3f;
